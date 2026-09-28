@@ -96,3 +96,39 @@ Crop_Yield_Prediction/
 └── static/
     ├── style.css
     └── background.png
+
+
+
+
+
+
+
+
+
+
+    ⚙️ Installation
+
+Clone the repository:
+
+git clone YOUR_GITHUB_REPOSITORY_URL
+
+Go into the project folder:
+
+cd Crop_Yield_Prediction
+
+Install the required Python libraries:
+
+pip install flask pandas numpy scikit-learn joblib
+▶️ Run the Application
+
+Run:
+
+python app.py
+
+You should see something similar to:
+
+Running on http://127.0.0.1:5000
+
+Open the URL in your browser:
+
+http://127.0.0.1:5000
