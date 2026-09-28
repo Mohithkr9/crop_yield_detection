@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Messages - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🚜 AgriPredict
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('about') }}">
+            About
+        </a>
+
+        <a href="{{ url_for('contact') }}">
+            Contact
+        </a>
+
+        <div class="profile-dropdown">
+
+            <button class="profile-button">
+                👤 {{ session.get('user_name', 'Profile') }} ▼
+            </button>
+
+            <div class="dropdown-content">
+
+                <a href="{{ url_for('profile') }}">
+                    My Profile
+                </a>
+
+                <a href="{{ url_for('profile_settings') }}">
+                    Profile Settings
+                </a>
+
+                <a href="{{ url_for('messages') }}">
+                    My Messages
+                </a>
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card wide-card">
+
+        <div class="page-heading-row">
+
+            <div>
+
+                <h1>📨 My Messages</h1>
+
+                <p>
+                    View messages sent to the administrator
+                    and replies from the administrator.
+                </p>
+
+            </div>
+
+            <a href="{{ url_for('contact') }}"
+               class="primary-button">
+
+                + New Message
+
+            </a>
+
+        </div>
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="message-card">
+
+                    <div class="message-header">
+
+                        <div>
+
+                            <h3>
+                                {{ message["subject"] }}
+                            </h3>
+
+                            <p class="message-date">
+                                {{ message["created_at"] }}
+                            </p>
+
+                        </div>
+
+
+                        <span class="message-status
+                            {% if message['status'] == 'Replied' %}
+                                replied
+                            {% else %}
+                                unread
+                            {% endif %}">
+
+                            {{ message["status"] }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="message-body">
+
+                        <strong>
+                            Your Message
+                        </strong>
+
+                        <p>
+                            {{ message["message"] }}
+                        </p>
+
+                    </div>
+
+
+                    {% if message["reply"] %}
+
+                        <div class="admin-reply">
+
+                            <strong>
+                                👨‍💼 Admin Reply
+                            </strong>
+
+                            <p>
+                                {{ message["reply"] }}
+                            </p>
+
+                            {% if message["replied_at"] %}
+
+                                <small>
+                                    Replied on:
+                                    {{ message["replied_at"] }}
+                                </small>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="waiting-reply">
+
+                            ⏳ Waiting for admin reply...
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h2>
+                    No Messages Yet
+                </h2>
+
+                <p>
+                    You have not sent any messages to the administrator.
+                </p>
+
+                <br>
+
+                <a href="{{ url_for('contact') }}"
+                   class="primary-button">
+
+                    Contact Admin
+
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

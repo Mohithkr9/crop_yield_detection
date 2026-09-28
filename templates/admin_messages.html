@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Messages - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🛡️ AgriPredict Admin
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_messages') }}">
+            Messages
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card wide-card">
+
+        <h1>📨 User Messages</h1>
+
+        <p>
+            Read messages from users and reply to them.
+        </p>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="admin-message-card">
+
+                    <div class="message-header">
+
+                        <div>
+
+                            <h3>
+                                {{ message["subject"] }}
+                            </h3>
+
+                            <p>
+                                From:
+                                <strong>
+                                    {{ message["user_name"] }}
+                                </strong>
+                            </p>
+
+                            <p>
+                                Email:
+                                {{ message["user_email"] }}
+                            </p>
+
+                        </div>
+
+
+                        <span class="message-status
+                            {% if message['status'] == 'Replied' %}
+                                replied
+                            {% else %}
+                                unread
+                            {% endif %}">
+
+                            {{ message["status"] }}
+
+                        </span>
+
+                    </div>
+
+
+                    <p class="message-date">
+
+                        Received:
+                        {{ message["created_at"] }}
+
+                    </p>
+
+
+                    <div class="message-body">
+
+                        <strong>
+                            User Message:
+                        </strong>
+
+                        <p>
+                            {{ message["message"] }}
+                        </p>
+
+                    </div>
+
+
+                    {% if message["reply"] %}
+
+                        <div class="admin-reply">
+
+                            <strong>
+                                Current Admin Reply:
+                            </strong>
+
+                            <p>
+                                {{ message["reply"] }}
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <form method="POST"
+                          action="{{ url_for('admin_reply', message_id=message['id']) }}"
+                          class="reply-form">
+
+                        <label>
+                            Reply
+                        </label>
+
+                        <textarea name="reply"
+                                  rows="5"
+                                  placeholder="Write your reply..."
+                                  required></textarea>
+
+                        <button type="submit"
+                                class="primary-button">
+
+                            📤 Send Reply
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h2>
+                    No Messages
+                </h2>
+
+                <p>
+                    No users have contacted you yet.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

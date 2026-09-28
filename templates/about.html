@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>About - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🚜 AgriPredict
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+
+        <a href="{{ url_for('about') }}">About</a>
+
+        <a href="{{ url_for('contact') }}">Contact</a>
+
+        <div class="profile-dropdown">
+
+            <button class="profile-button">
+                👤 {{ session.get('user_name', 'Profile') }} ▼
+            </button>
+
+            <div class="dropdown-content">
+
+                <a href="{{ url_for('profile') }}">
+                    My Profile
+                </a>
+
+                <a href="{{ url_for('profile_settings') }}">
+                    Profile Settings
+                </a>
+
+                <a href="{{ url_for('messages') }}">
+                    My Messages
+                </a>
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card wide-card">
+
+        <h1>About AgriPredict</h1>
+
+        <p>
+            AgriPredict is a machine learning based crop yield
+            prediction system.
+        </p>
+
+        <p>
+            The system uses agricultural information such as
+            crop type, area, year, rainfall, pesticide usage
+            and average temperature to predict crop yield.
+        </p>
+
+
+        <h2>🌾 Supported Crops</h2>
+
+        <div class="crop-grid">
+
+            <div class="crop-card">
+                <h3>🌽 Maize</h3>
+                <p>A major cereal crop used for food and animal feed.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🍌 Plantains</h3>
+                <p>A tropical crop commonly used as a staple food.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🥔 Potatoes</h3>
+                <p>An important food crop grown in many regions.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🌾 Rice</h3>
+                <p>One of the major staple food crops around the world.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🌾 Sorghum</h3>
+                <p>A cereal crop that can grow in relatively dry areas.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🌱 Soybeans</h3>
+                <p>Used for food, animal feed and oil production.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🍠 Sweet Potatoes</h3>
+                <p>A nutritious root crop grown in many regions.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🌾 Wheat</h3>
+                <p>An important cereal crop used for many food products.</p>
+            </div>
+
+            <div class="crop-card">
+                <h3>🌱 Yams</h3>
+                <p>A tropical root crop used as an important food source.</p>
+            </div>
+
+        </div>
+
+
+        <h2>🤖 Machine Learning</h2>
+
+        <p>
+            AgriPredict uses a Linear Regression machine learning
+            model trained using historical agricultural data.
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>

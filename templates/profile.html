@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🚜 AgriPredict
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('about') }}">
+            About
+        </a>
+
+        <a href="{{ url_for('contact') }}">
+            Contact
+        </a>
+
+        <div class="profile-dropdown">
+
+            <button class="profile-button">
+                👤 {{ user["name"] }} ▼
+            </button>
+
+            <div class="dropdown-content">
+
+                <a href="{{ url_for('profile') }}">
+                    My Profile
+                </a>
+
+                <a href="{{ url_for('profile_settings') }}">
+                    Profile Settings
+                </a>
+
+                <a href="{{ url_for('messages') }}">
+                    My Messages
+                </a>
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card profile-card">
+
+        <div class="profile-avatar">
+            👤
+        </div>
+
+        <h1>
+            My Profile
+        </h1>
+
+        <div class="profile-info">
+
+            <div class="info-row">
+
+                <span>
+                    Name
+                </span>
+
+                <strong>
+                    {{ user["name"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    {{ user["email"] }}
+                </strong>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span>
+                    Account Created
+                </span>
+
+                <strong>
+                    {{ user["created_at"] }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <a href="{{ url_for('profile_settings') }}"
+           class="primary-button">
+
+            Edit Profile
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<footer class="footer">
+
+    <p>
+        © 2026 AgriPredict
+    </p>
+
+</footer>
+
+</body>
+</html>

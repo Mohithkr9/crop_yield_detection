@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🛡️ AgriPredict Admin
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_messages') }}">
+            Messages
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card wide-card">
+
+        <div class="page-heading-row">
+
+            <div>
+
+                <h1>
+                    Admin Dashboard
+                </h1>
+
+                <p>
+                    Manage AgriPredict users and messages.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    👥
+                </div>
+
+                <h3>
+                    Total Users
+                </h3>
+
+                <div class="stat-number">
+                    {{ total_users }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    📩
+                </div>
+
+                <h3>
+                    Total Messages
+                </h3>
+
+                <div class="stat-number">
+                    {{ total_messages }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🔔
+                </div>
+
+                <h3>
+                    Unread Messages
+                </h3>
+
+                <div class="stat-number">
+                    {{ unread_messages }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- USERS -->
+
+        <h2 class="section-title">
+            Registered Users
+        </h2>
+
+
+        {% if users %}
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Registered
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for user in users %}
+
+                    <tr>
+
+                        <td>
+                            {{ user["id"] }}
+                        </td>
+
+                        <td>
+                            {{ user["name"] }}
+                        </td>
+
+                        <td>
+                            {{ user["email"] }}
+                        </td>
+
+                        <td>
+                            {{ user["created_at"] }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <p>
+                No registered users yet.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="admin-actions">
+
+            <a href="{{ url_for('admin_messages') }}"
+               class="primary-button">
+
+                📩 Manage Messages
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

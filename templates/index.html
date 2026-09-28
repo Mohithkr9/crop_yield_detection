@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AgriPredict - Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        🚜 AgriPredict
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('about') }}">
+            About
+        </a>
+
+        <a href="{{ url_for('contact') }}">
+            Contact
+        </a>
+
+        <div class="profile-dropdown">
+
+            <button class="profile-button">
+                👤 {{ session.get('user_name', 'Profile') }} ▼
+            </button>
+
+            <div class="dropdown-content">
+
+                <a href="{{ url_for('profile') }}">
+                    My Profile
+                </a>
+
+                <a href="{{ url_for('profile_settings') }}">
+                    Profile Settings
+                </a>
+
+                <a href="{{ url_for('messages') }}">
+                    My Messages
+                </a>
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- =========================================================
+     MAIN DASHBOARD
+========================================================= -->
+
+<main class="dashboard-container">
+
+    <section class="welcome-section">
+
+        <h1>
+            Welcome to AgriPredict
+        </h1>
+
+        <p>
+            Predict crop yield using machine learning.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         PREDICTION CARD
+    ====================================================== -->
+
+    <section class="prediction-card">
+
+        <div class="card-header">
+
+            <h2>
+                🌾 Crop Yield Prediction
+            </h2>
+
+            <p>
+                Enter the agricultural details below.
+            </p>
+
+        </div>
+
+
+        <form action="{{ url_for('predict') }}"
+              method="POST"
+              class="prediction-form">
+
+
+            <!-- AREA -->
+
+            <div class="form-group">
+
+                <label for="area">
+                    Area
+                </label>
+
+                <select id="area"
+                        name="area"
+                        required>
+
+                    <option value="">
+                        Select Area
+                    </option>
+
+                    {% for area_name in areas %}
+
+                    <option value="{{ area_name }}"
+                        {% if area is defined and area == area_name %}
+                            selected
+                        {% endif %}>
+
+                        {{ area_name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- CROP -->
+
+            <div class="form-group">
+
+                <label for="item">
+                    Crop
+                </label>
+
+                <select id="item"
+                        name="item"
+                        required>
+
+                    <option value="">
+                        Select Crop
+                    </option>
+
+                    {% for crop in crops %}
+
+                    <option value="{{ crop }}"
+                        {% if item is defined and item == crop %}
+                            selected
+                        {% endif %}>
+
+                        {{ crop }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- YEAR -->
+
+            <div class="form-group">
+
+                <label for="year">
+                    Year
+                </label>
+
+                <input type="number"
+                       id="year"
+                       name="year"
+                       min="1990"
+                       max="2100"
+                       value="{{ year if year is defined else 2026 }}"
+                       required>
+
+            </div>
+
+
+            <!-- RAINFALL -->
+
+            <div class="form-group">
+
+                <label for="rainfall">
+                    Average Rainfall (mm/year)
+                </label>
+
+                <input type="number"
+                       step="any"
+                       id="rainfall"
+                       name="rainfall"
+                       placeholder="Example: 1200"
+                       value="{{ rainfall if rainfall is defined else '' }}"
+                       required>
+
+            </div>
+
+
+            <!-- PESTICIDES -->
+
+            <div class="form-group">
+
+                <label for="pesticides">
+                    Pesticides (tonnes)
+                </label>
+
+                <input type="number"
+                       step="any"
+                       id="pesticides"
+                       name="pesticides"
+                       placeholder="Example: 100"
+                       value="{{ pesticides if pesticides is defined else '' }}"
+                       required>
+
+            </div>
+
+
+            <!-- TEMPERATURE -->
+
+            <div class="form-group">
+
+                <label for="temperature">
+                    Average Temperature (°C)
+                </label>
+
+                <input type="number"
+                       step="any"
+                       id="temperature"
+                       name="temperature"
+                       placeholder="Example: 25"
+                       value="{{ temperature if temperature is defined else '' }}"
+                       required>
+
+            </div>
+
+
+            <div class="form-submit">
+
+                <button type="submit"
+                        class="primary-button">
+
+                    🌱 Predict Crop Yield
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         PREDICTION RESULT
+    ====================================================== -->
+
+    {% if prediction_tonnes is not none %}
+
+    <section class="result-card">
+
+        <div class="result-icon">
+            🌾
+        </div>
+
+        <div class="result-content">
+
+            <h2>
+                Prediction Result
+            </h2>
+
+            <div class="prediction-number">
+
+                {{ "%.2f"|format(prediction_tonnes) }}
+
+            </div>
+
+            <p class="prediction-unit">
+                tonnes / hectare
+            </p>
+
+            <p class="result-description">
+
+                Estimated crop yield for
+
+                <strong>
+                    {{ item }}
+                </strong>
+
+                in
+
+                <strong>
+                    {{ area }}
+                </strong>
+
+                for
+
+                <strong>
+                    {{ year }}
+                </strong>.
+
+            </p>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         FLASH MESSAGES
+    ====================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="footer">
+
+    <p>
+        © 2026 AgriPredict | Crop Yield Prediction System
+    </p>
+
+</footer>
+
+</body>
+</html>

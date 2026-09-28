@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Contact - AgriPredict</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🚜 AgriPredict
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('about') }}">
+            About
+        </a>
+
+        <a href="{{ url_for('contact') }}">
+            Contact
+        </a>
+
+        <div class="profile-dropdown">
+
+            <button class="profile-button">
+                👤 {{ session.get('user_name', 'Profile') }} ▼
+            </button>
+
+            <div class="dropdown-content">
+
+                <a href="{{ url_for('profile') }}">
+                    My Profile
+                </a>
+
+                <a href="{{ url_for('profile_settings') }}">
+                    Profile Settings
+                </a>
+
+                <a href="{{ url_for('messages') }}">
+                    My Messages
+                </a>
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<div class="page-container">
+
+    <div class="page-card contact-card">
+
+        <h1>📩 Contact Admin</h1>
+
+        <p>
+            Send your question or feedback directly to the
+            AgriPredict administrator.
+        </p>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <form method="POST"
+              action="{{ url_for('contact') }}">
+
+            <div class="form-group">
+
+                <label>
+                    Subject
+                </label>
+
+                <input type="text"
+                       name="subject"
+                       placeholder="Enter subject"
+                       required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Message
+                </label>
+
+                <textarea name="message"
+                          rows="7"
+                          placeholder="Write your message..."
+                          required></textarea>
+
+            </div>
+
+
+            <button type="submit"
+                    class="primary-button">
+
+                📤 Send Message
+
+            </button>
+
+        </form>
+
+
+        <div class="message-link">
+
+            <a href="{{ url_for('messages') }}">
+                View My Messages
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
