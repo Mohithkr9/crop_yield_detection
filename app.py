@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 app.secret_key = "agripredict_secret_key_2026"
 
+
 # ============================================================
 # LOAD MODEL
 # ============================================================
@@ -23,8 +24,11 @@ feature_columns = joblib.load("feature_columns.pkl")
 # ============================================================
 
 def get_db_connection():
+
     conn = sqlite3.connect("users.db")
+
     conn.row_factory = sqlite3.Row
+
     return conn
 
 
@@ -32,6 +36,7 @@ def init_db():
 
     conn = get_db_connection()
 
+    # USERS TABLE
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,6 +47,7 @@ def init_db():
         )
     """)
 
+    # ADMINS TABLE
     conn.execute("""
         CREATE TABLE IF NOT EXISTS admins (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +58,7 @@ def init_db():
         )
     """)
 
+    # MESSAGES TABLE
     conn.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,6 +73,7 @@ def init_db():
         )
     """)
 
+    # CREATE DEFAULT ADMIN
     admin = conn.execute(
         "SELECT * FROM admins WHERE email = ?",
         ("admin@agripredict.com",)
@@ -76,7 +84,11 @@ def init_db():
         hashed_password = generate_password_hash("Admin@123")
 
         conn.execute("""
-            INSERT INTO admins (name, email, password)
+            INSERT INTO admins (
+                name,
+                email,
+                password
+            )
             VALUES (?, ?, ?)
         """, (
             "AgriPredict Admin",
@@ -85,9 +97,11 @@ def init_db():
         ))
 
     conn.commit()
+
     conn.close()
 
 
+# Initialize database
 init_db()
 
 
@@ -101,6 +115,7 @@ def login_required(function):
     def decorated_function(*args, **kwargs):
 
         if "user_id" not in session:
+
             return redirect(url_for("login"))
 
         return function(*args, **kwargs)
@@ -118,6 +133,7 @@ def admin_required(function):
     def decorated_function(*args, **kwargs):
 
         if "admin_id" not in session:
+
             return redirect(url_for("admin_login"))
 
         return function(*args, **kwargs)
@@ -131,6 +147,7 @@ def admin_required(function):
 
 @app.route("/")
 def home():
+
     return redirect(url_for("login"))
 
 
@@ -146,6 +163,15 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
+        if not email or not password:
+
+            flash(
+                "Please enter email and password.",
+                "error"
+            )
+
+            return redirect(url_for("login"))
+
         conn = get_db_connection()
 
         user = conn.execute(
@@ -155,7 +181,10 @@ def login():
 
         conn.close()
 
-        if user and check_password_hash(user["password"], password):
+        if user and check_password_hash(
+            user["password"],
+            password
+        ):
 
             session.clear()
 
@@ -165,7 +194,10 @@ def login():
 
             return redirect(url_for("dashboard"))
 
-        flash("Invalid email or password.", "error")
+        flash(
+            "Invalid email or password.",
+            "error"
+        )
 
     return render_template("login.html")
 
@@ -183,47 +215,97 @@ def register():
         email = request.form.get("email")
         password = request.form.get("password")
 
+        # Remove unnecessary spaces
+        if name:
+            name = name.strip()
+
+        if email:
+            email = email.strip().lower()
+
+        # Validate fields
         if not name or not email or not password:
 
-            flash("Please fill all fields.", "error")
+            flash(
+                "Please fill all fields.",
+                "error"
+            )
 
             return redirect(url_for("register"))
 
         conn = get_db_connection()
 
-        existing_user = conn.execute(
-            "SELECT * FROM users WHERE email = ?",
-            (email,)
-        ).fetchone()
+        try:
 
-        if existing_user:
+            # Check if email already exists
+            existing_user = conn.execute(
+                "SELECT * FROM users WHERE email = ?",
+                (email,)
+            ).fetchone()
 
-            conn.close()
+            if existing_user:
 
-            flash("Email already registered.", "error")
+                flash(
+                    "Email already registered.",
+                    "error"
+                )
+
+                return redirect(url_for("register"))
+
+            # Hash password
+            hashed_password = generate_password_hash(password)
+
+            # Insert user
+            conn.execute("""
+                INSERT INTO users (
+                    name,
+                    email,
+                    password
+                )
+                VALUES (?, ?, ?)
+            """, (
+                name,
+                email,
+                hashed_password
+            ))
+
+            conn.commit()
+
+            flash(
+                "Registration successful. Please login.",
+                "success"
+            )
+
+            return redirect(url_for("login"))
+
+        except sqlite3.IntegrityError as e:
+
+            conn.rollback()
+
+            print("DATABASE INTEGRITY ERROR:", e)
+
+            flash(
+                "Email already registered.",
+                "error"
+            )
 
             return redirect(url_for("register"))
 
-        hashed_password = generate_password_hash(password)
+        except Exception as e:
 
-        conn.execute("""
-            INSERT INTO users (name, email, password)
-            VALUES (?, ?, ?)
-        """, (
-            name,
-            email,
-            hashed_password
-        ))
+            conn.rollback()
 
-        conn.commit()
-        conn.close()
+            print("REGISTRATION ERROR:", e)
 
-        flash(
-            "Registration successful. Please login.",
-            "success"
-        )
+            flash(
+                "Registration error: " + str(e),
+                "error"
+            )
 
-        return redirect(url_for("login"))
+            return redirect(url_for("register"))
+
+        finally:
+
+            conn.close()
 
     return render_template("register.html")
 
@@ -259,7 +341,10 @@ def get_areas():
 
         if column.startswith("Area_"):
 
-            area_name = column.replace("Area_", "")
+            area_name = column.replace(
+                "Area_",
+                ""
+            )
 
             areas.append(area_name)
 
@@ -275,17 +360,16 @@ def get_areas():
 def dashboard():
 
     crops = get_crops()
+
     areas = get_areas()
 
     return render_template(
         "index.html",
 
-        # IMPORTANT:
-        # Dashboard opens before prediction,
-        # so this must exist.
         prediction_tonnes=None,
 
         crops=crops,
+
         areas=areas
     )
 
@@ -301,9 +385,12 @@ def predict():
     try:
 
         area = request.form.get("area")
+
         item = request.form.get("item")
 
-        year = int(request.form.get("year"))
+        year = int(
+            request.form.get("year")
+        )
 
         rainfall = float(
             request.form.get(
@@ -351,53 +438,77 @@ def predict():
 
         })
 
+        # Convert categorical values
+        # into dummy variables
         input_data = pd.get_dummies(
             input_data,
+
             columns=[
                 "Area",
                 "Item"
             ],
+
             drop_first=True
         )
 
+        # Make sure columns match
+        # the trained model
         input_data = input_data.reindex(
             columns=feature_columns,
+
             fill_value=0
         )
 
-        prediction_hg_per_ha = model.predict(input_data)[0]
+        # Model prediction
+        prediction_hg_per_ha = model.predict(
+            input_data
+        )[0]
 
+        # Convert hg/ha to tonnes/ha
         prediction = prediction_hg_per_ha / 10000
 
         crops = get_crops()
+
         areas = get_areas()
 
         return render_template(
+
             "index.html",
 
-            # IMPORTANT:
-            # This is the actual prediction.
             prediction_tonnes=prediction,
 
             area=area,
+
             item=item,
+
             year=year,
+
             rainfall=rainfall,
+
             pesticides=pesticides,
+
             temperature=temperature,
 
             crops=crops,
+
             areas=areas
         )
 
     except Exception as e:
+
+        print(
+            "PREDICTION ERROR:",
+            e
+        )
 
         flash(
             "Prediction error: " + str(e),
             "error"
         )
 
-        return redirect(url_for("dashboard"))
+        return redirect(
+            url_for("dashboard")
+        )
 
 
 # ============================================================
@@ -422,6 +533,7 @@ def contact():
     if request.method == "POST":
 
         subject = request.form.get("subject")
+
         message = request.form.get("message")
 
         if not subject or not message:
@@ -431,34 +543,57 @@ def contact():
                 "error"
             )
 
-            return redirect(url_for("contact"))
+            return redirect(
+                url_for("contact")
+            )
 
         conn = get_db_connection()
 
-        conn.execute("""
-            INSERT INTO messages (
-                user_id,
+        try:
+
+            conn.execute("""
+                INSERT INTO messages (
+                    user_id,
+                    subject,
+                    message,
+                    status
+                )
+                VALUES (?, ?, ?, ?)
+            """, (
+                session["user_id"],
                 subject,
                 message,
-                status
+                "Unread"
+            ))
+
+            conn.commit()
+
+            flash(
+                "Message sent successfully.",
+                "success"
             )
-            VALUES (?, ?, ?, ?)
-        """, (
-            session["user_id"],
-            subject,
-            message,
-            "Unread"
-        ))
 
-        conn.commit()
-        conn.close()
+        except Exception as e:
 
-        flash(
-            "Message sent successfully.",
-            "success"
+            conn.rollback()
+
+            print(
+                "CONTACT ERROR:",
+                e
+            )
+
+            flash(
+                "Could not send message.",
+                "error"
+            )
+
+        finally:
+
+            conn.close()
+
+        return redirect(
+            url_for("messages")
         )
-
-        return redirect(url_for("messages"))
 
     return render_template("contact.html")
 
@@ -491,6 +626,7 @@ def messages():
 
     return render_template(
         "messages.html",
+
         messages=user_messages
     )
 
@@ -516,10 +652,13 @@ def profile():
 
         session.clear()
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
     return render_template(
         "profile.html",
+
         user=user
     )
 
@@ -528,7 +667,10 @@ def profile():
 # PROFILE SETTINGS
 # ============================================================
 
-@app.route("/profile/settings", methods=["GET", "POST"])
+@app.route(
+    "/profile/settings",
+    methods=["GET", "POST"]
+)
 @login_required
 def profile_settings():
 
@@ -545,12 +687,21 @@ def profile_settings():
 
         session.clear()
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
     if request.method == "POST":
 
         name = request.form.get("name")
+
         email = request.form.get("email")
+
+        if name:
+            name = name.strip()
+
+        if email:
+            email = email.strip().lower()
 
         if not name or not email:
 
@@ -561,13 +712,19 @@ def profile_settings():
                 "error"
             )
 
-            return redirect(url_for("profile_settings"))
+            return redirect(
+                url_for("profile_settings")
+            )
 
         try:
 
             conn.execute("""
                 UPDATE users
-                SET name = ?, email = ?
+
+                SET
+                    name = ?,
+                    email = ?
+
                 WHERE id = ?
             """, (
                 name,
@@ -578,32 +735,58 @@ def profile_settings():
             conn.commit()
 
             session["user_name"] = name
-            session["user_email"] = email
 
-            conn.close()
+            session["user_email"] = email
 
             flash(
                 "Profile updated successfully.",
                 "success"
             )
 
-            return redirect(url_for("profile"))
+            return redirect(
+                url_for("profile")
+            )
 
         except sqlite3.IntegrityError:
 
-            conn.close()
+            conn.rollback()
 
             flash(
                 "Email already exists.",
                 "error"
             )
 
-            return redirect(url_for("profile_settings"))
+            return redirect(
+                url_for("profile_settings")
+            )
+
+        except Exception as e:
+
+            conn.rollback()
+
+            print(
+                "PROFILE UPDATE ERROR:",
+                e
+            )
+
+            flash(
+                "Profile update failed.",
+                "error"
+            )
+
+            return redirect(
+                url_for("profile_settings")
+            )
+
+        finally:
+
+            conn.close()
 
     conn.close()
 
     return render_template(
         "profile_settings.html",
+
         user=user
     )
 
@@ -617,20 +800,37 @@ def logout():
 
     session.clear()
 
-    return redirect(url_for("login"))
+    return redirect(
+        url_for("login")
+    )
 
 
 # ============================================================
 # ADMIN LOGIN
 # ============================================================
 
-@app.route("/admin/login", methods=["GET", "POST"])
+@app.route(
+    "/admin/login",
+    methods=["GET", "POST"]
+)
 def admin_login():
 
     if request.method == "POST":
 
         email = request.form.get("email")
+
         password = request.form.get("password")
+
+        if not email or not password:
+
+            flash(
+                "Please enter email and password.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_login")
+            )
 
         conn = get_db_connection()
 
@@ -649,17 +849,23 @@ def admin_login():
             session.clear()
 
             session["admin_id"] = admin["id"]
+
             session["admin_name"] = admin["name"]
+
             session["admin_email"] = admin["email"]
 
-            return redirect(url_for("admin_dashboard"))
+            return redirect(
+                url_for("admin_dashboard")
+            )
 
         flash(
             "Invalid admin email or password.",
             "error"
         )
 
-    return render_template("admin_login.html")
+    return render_template(
+        "admin_login.html"
+    )
 
 
 # ============================================================
@@ -700,9 +906,13 @@ def admin_dashboard():
 
     return render_template(
         "admin_dashboard.html",
+
         total_users=total_users,
+
         users=users,
+
         total_messages=total_messages,
+
         unread_messages=unread_messages
     )
 
@@ -732,6 +942,7 @@ def admin_messages():
 
     return render_template(
         "admin_messages.html",
+
         messages=all_messages
     )
 
@@ -756,33 +967,58 @@ def admin_reply(message_id):
             "error"
         )
 
-        return redirect(url_for("admin_messages"))
+        return redirect(
+            url_for("admin_messages")
+        )
 
     conn = get_db_connection()
 
-    conn.execute("""
-        UPDATE messages
-        SET
-            reply = ?,
-            status = ?,
-            replied_at = ?
-        WHERE id = ?
-    """, (
-        reply,
-        "Replied",
-        datetime.now(),
-        message_id
-    ))
+    try:
 
-    conn.commit()
-    conn.close()
+        conn.execute("""
+            UPDATE messages
 
-    flash(
-        "Reply sent successfully.",
-        "success"
+            SET
+                reply = ?,
+                status = ?,
+                replied_at = ?
+
+            WHERE id = ?
+        """, (
+            reply,
+            "Replied",
+            datetime.now(),
+            message_id
+        ))
+
+        conn.commit()
+
+        flash(
+            "Reply sent successfully.",
+            "success"
+        )
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "ADMIN REPLY ERROR:",
+            e
+        )
+
+        flash(
+            "Could not send reply.",
+            "error"
+        )
+
+    finally:
+
+        conn.close()
+
+    return redirect(
+        url_for("admin_messages")
     )
-
-    return redirect(url_for("admin_messages"))
 
 
 # ============================================================
@@ -794,13 +1030,17 @@ def admin_logout():
 
     session.clear()
 
-    return redirect(url_for("admin_login"))
+    return redirect(
+        url_for("admin_login")
+    )
 
 
 # ============================================================
-# RUN
+# RUN APPLICATION
 # ============================================================
 
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run(
+        debug=True
+    )
