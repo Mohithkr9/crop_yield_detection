@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta name="viewport"
@@ -10,9 +12,12 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
+
 <body>
+
 
 <!-- =========================================================
      NAVBAR
@@ -23,6 +28,7 @@
     <div class="logo">
         🚜 AgriPredict
     </div>
+
 
     <div class="nav-links">
 
@@ -38,11 +44,13 @@
             Contact
         </a>
 
+
         <div class="profile-dropdown">
 
             <button class="profile-button">
                 👤 {{ session.get('user_name', 'Profile') }} ▼
             </button>
+
 
             <div class="dropdown-content">
 
@@ -71,11 +79,17 @@
 </nav>
 
 
+
 <!-- =========================================================
      MAIN DASHBOARD
 ========================================================= -->
 
 <main class="dashboard-container">
+
+
+    <!-- =====================================================
+         WELCOME
+    ====================================================== -->
 
     <section class="welcome-section">
 
@@ -90,11 +104,13 @@
     </section>
 
 
+
     <!-- =====================================================
          PREDICTION CARD
     ====================================================== -->
 
     <section class="prediction-card">
+
 
         <div class="card-header">
 
@@ -107,6 +123,7 @@
             </p>
 
         </div>
+
 
 
         <form action="{{ url_for('predict') }}"
@@ -148,6 +165,7 @@
             </div>
 
 
+
             <!-- CROP -->
 
             <div class="form-group">
@@ -182,6 +200,7 @@
             </div>
 
 
+
             <!-- YEAR -->
 
             <div class="form-group">
@@ -200,24 +219,6 @@
 
             </div>
 
-
-            <!-- RAINFALL -->
-
-            <div class="form-group">
-
-                <label for="rainfall">
-                    Average Rainfall (mm/year)
-                </label>
-
-                <input type="number"
-                       step="any"
-                       id="rainfall"
-                       name="rainfall"
-                       placeholder="Example: 1200"
-                       value="{{ rainfall if rainfall is defined else '' }}"
-                       required>
-
-            </div>
 
 
             <!-- PESTICIDES -->
@@ -239,6 +240,7 @@
             </div>
 
 
+
             <!-- TEMPERATURE -->
 
             <div class="form-group">
@@ -258,6 +260,9 @@
             </div>
 
 
+
+            <!-- SUBMIT -->
+
             <div class="form-submit">
 
                 <button type="submit"
@@ -269,9 +274,11 @@
 
             </div>
 
+
         </form>
 
     </section>
+
 
 
     <!-- =====================================================
@@ -282,9 +289,11 @@
 
     <section class="result-card">
 
+
         <div class="result-icon">
             🌾
         </div>
+
 
         <div class="result-content">
 
@@ -292,15 +301,18 @@
                 Prediction Result
             </h2>
 
+
             <div class="prediction-number">
 
                 {{ "%.2f"|format(prediction_tonnes) }}
 
             </div>
 
+
             <p class="prediction-unit">
                 tonnes / hectare
             </p>
+
 
             <p class="result-description">
 
@@ -328,7 +340,567 @@
 
     </section>
 
+
+    <!-- =====================================================
+         CROP IMPROVEMENT BUTTON
+    ====================================================== -->
+
+    <div class="improvement-button-container">
+
+        <button type="button"
+                id="showImprovementBtn"
+                class="improvement-main-btn"
+                onclick="showCropImprovement()">
+
+            🌱 How to Improve Crop at This Location
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CROP IMPROVEMENT SECTION
+    ====================================================== -->
+
+    <section id="improvementSection"
+             class="improvement-card"
+             style="display:none;">
+
+
+        <div class="improvement-header">
+
+            <h2>
+                🌱 How to Improve Your Crop
+            </h2>
+
+            <p>
+                Recommendations based on your selected crop,
+                rainfall, temperature and pesticide input.
+            </p>
+
+        </div>
+
+
+
+        <!-- LOCATION SUMMARY -->
+
+        <div class="location-summary">
+
+            <div>
+
+                <strong>
+                    📍 Location
+                </strong>
+
+                <span>
+                    {{ area }}
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    🌾 Crop
+                </strong>
+
+                <span>
+                    {{ item }}
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    🌧️ Rainfall
+                </strong>
+
+                <span>
+                    {{ rainfall }} mm/year
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    🌡️ Temperature
+                </strong>
+
+                <span>
+                    {{ temperature }} °C
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    🧪 Pesticide Input
+                </strong>
+
+                <span>
+                    {{ pesticides }} tonnes
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RECOMMENDATIONS -->
+
+        <div class="recommendation-grid">
+
+            {% for recommendation in crop_recommendations %}
+
+            <div class="recommendation-card">
+
+                <div class="recommendation-icon">
+
+                    {{ recommendation.icon }}
+
+                </div>
+
+
+                <h3>
+
+                    {{ recommendation.title }}
+
+                </h3>
+
+
+                <p>
+
+                    {{ recommendation.text }}
+
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+
+        <!-- =================================================
+             PESTICIDE GUIDANCE
+        ================================================== -->
+
+        <div class="pesticide-guidance-box">
+
+
+            <div class="pesticide-guidance-header">
+
+                <span class="pesticide-big-icon">
+                    🧪
+                </span>
+
+
+                <div>
+
+                    <h3>
+                        Pesticide Application Guidance
+                    </h3>
+
+                    <p>
+                        Select the pest or disease before choosing a pesticide.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="pesticide-form">
+
+                <label for="pestDisease">
+                    🐛 Pest / Disease
+                </label>
+
+
+                <select id="pestDisease"
+                        onchange="showPesticideGuidance()">
+
+                    <option value="">
+                        -- Select Pest / Disease --
+                    </option>
+
+                    <option value="unknown">
+                        I don't know
+                    </option>
+
+                    <option value="insect">
+                        Insect infestation
+                    </option>
+
+                    <option value="fungal">
+                        Fungal disease
+                    </option>
+
+                    <option value="weed">
+                        Weed problem
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <div id="pesticideGuidanceResult"
+                 class="pesticide-result"
+                 style="display:none;">
+
+            </div>
+
+
+
+            <div class="pesticide-warning">
+
+                ⚠️
+
+                <strong>
+                    Important:
+                </strong>
+
+                Do not calculate pesticide dosage from predicted
+                crop yield or from the ML model's pesticide input.
+
+                Actual application rate depends on the identified
+                pest/disease, crop, product formulation and registered
+                label or official agricultural recommendation.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- IMPORTANT NOTE -->
+
+        <div class="important-note">
+
+            <strong>
+                🌱 Best Practice:
+            </strong>
+
+            Use these recommendations as crop-management guidance.
+
+            For fertilizer and pesticide quantities, use soil-test
+            results, pest identification and official agricultural
+            recommendations.
+
+        </div>
+
+
+    </section>
+
     {% endif %}
+
+
+
+    <!-- =====================================================
+         WEATHER SECTION
+    ====================================================== -->
+
+    <section class="weather-section">
+
+
+        <!-- WEATHER HEADER -->
+
+        <div class="weather-header">
+
+            <h2>
+                🌦️ Current Weather Conditions
+            </h2>
+
+            <p>
+                Live weather information for the configured weather location
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             THREE WEATHER GAUGES
+        ================================================== -->
+
+        <div class="weather-gauges">
+
+
+            <!-- TEMPERATURE -->
+
+            <div class="weather-gauge-card">
+
+                <h3>
+                    🌡️ Temperature
+                </h3>
+
+
+                <div class="gauge">
+
+                    <div class="gauge-arc"></div>
+
+
+                    <div class="gauge-ticks">
+
+                        <span class="tick tick-1"></span>
+                        <span class="tick tick-2"></span>
+                        <span class="tick tick-3"></span>
+                        <span class="tick tick-4"></span>
+                        <span class="tick tick-5"></span>
+                        <span class="tick tick-6"></span>
+                        <span class="tick tick-7"></span>
+                        <span class="tick tick-8"></span>
+                        <span class="tick tick-9"></span>
+
+                    </div>
+
+
+                    <div id="temperatureNeedle"
+                         class="gauge-needle">
+                    </div>
+
+
+                    <div class="gauge-center"></div>
+
+
+                    <div class="gauge-value">
+
+                        <span id="temperatureValue">
+                            --
+                        </span>
+
+                        <small>
+                            °C
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div id="temperatureStatus"
+                     class="gauge-status">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+
+
+            <!-- HUMIDITY -->
+
+            <div class="weather-gauge-card">
+
+                <h3>
+                    💧 Humidity
+                </h3>
+
+
+                <div class="gauge">
+
+                    <div class="gauge-arc"></div>
+
+
+                    <div class="gauge-ticks">
+
+                        <span class="tick tick-1"></span>
+                        <span class="tick tick-2"></span>
+                        <span class="tick tick-3"></span>
+                        <span class="tick tick-4"></span>
+                        <span class="tick tick-5"></span>
+                        <span class="tick tick-6"></span>
+                        <span class="tick tick-7"></span>
+                        <span class="tick tick-8"></span>
+                        <span class="tick tick-9"></span>
+
+                    </div>
+
+
+                    <div id="humidityNeedle"
+                         class="gauge-needle">
+                    </div>
+
+
+                    <div class="gauge-center"></div>
+
+
+                    <div class="gauge-value">
+
+                        <span id="humidityValue">
+                            --
+                        </span>
+
+                        <small>
+                            %
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div id="humidityStatus"
+                     class="gauge-status">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CURRENT RAINFALL -->
+
+            <div class="weather-gauge-card">
+
+                <h3>
+                    🌧️ Current Rainfall
+                </h3>
+
+
+                <div class="gauge">
+
+                    <div class="gauge-arc"></div>
+
+
+                    <div class="gauge-ticks">
+
+                        <span class="tick tick-1"></span>
+                        <span class="tick tick-2"></span>
+                        <span class="tick tick-3"></span>
+                        <span class="tick tick-4"></span>
+                        <span class="tick tick-5"></span>
+                        <span class="tick tick-6"></span>
+                        <span class="tick tick-7"></span>
+                        <span class="tick tick-8"></span>
+                        <span class="tick tick-9"></span>
+
+                    </div>
+
+
+                    <div id="rainfallNeedle"
+                         class="gauge-needle">
+                    </div>
+
+
+                    <div class="gauge-center"></div>
+
+
+                    <div class="gauge-value">
+
+                        <span id="rainfallValue">
+                            --
+                        </span>
+
+                        <small>
+                            mm
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div id="rainfallStatus"
+                     class="gauge-status">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- WEATHER UPDATED TIME -->
+
+        <div class="weather-updated">
+
+            Last updated:
+
+            <span id="weatherUpdated">
+                Waiting for weather data...
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         AVERAGE ANNUAL RAINFALL
+    ====================================================== -->
+
+    <section class="annual-rainfall-section">
+
+
+        <div class="annual-rainfall-card">
+
+
+            <div class="annual-rainfall-icon">
+                🌧️
+            </div>
+
+
+            <div class="annual-rainfall-content">
+
+                <h2>
+                    Average Annual Rainfall
+                </h2>
+
+
+                <p>
+                    Historical average rainfall for the configured weather location
+                </p>
+
+
+                <div class="annual-rainfall-value">
+
+                    <span id="averageRainfallValue">
+                        --
+                    </span>
+
+                    <span class="annual-rainfall-unit">
+                        mm/year
+                    </span>
+
+                </div>
+
+
+                <div id="averageRainfallInfo"
+                     class="annual-rainfall-info">
+
+                    Calculating historical average...
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
 
 
     <!-- =====================================================
@@ -357,7 +929,9 @@
 
     {% endwith %}
 
+
 </main>
+
 
 
 <!-- =========================================================
@@ -372,5 +946,751 @@
 
 </footer>
 
+
+
+<!-- =========================================================
+     WEATHER + CROP IMPROVEMENT JAVASCRIPT
+========================================================= -->
+
+<script>
+
+
+/* ============================================================
+   CROP IMPROVEMENT BUTTON
+============================================================ */
+
+function showCropImprovement() {
+
+    const section =
+        document.getElementById("improvementSection");
+
+    const button =
+        document.getElementById("showImprovementBtn");
+
+
+    if (!section || !button) {
+        return;
+    }
+
+
+    if (section.style.display === "none") {
+
+        section.style.display = "block";
+
+        button.innerHTML =
+            "🌱 Hide Crop Improvement";
+
+
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+    else {
+
+        section.style.display = "none";
+
+        button.innerHTML =
+            "🌱 How to Improve Crop at This Location";
+
+    }
+
+}
+
+
+
+/* ============================================================
+   PESTICIDE GUIDANCE
+============================================================ */
+
+function showPesticideGuidance() {
+
+    const pest =
+        document.getElementById("pestDisease").value;
+
+    const result =
+        document.getElementById("pesticideGuidanceResult");
+
+
+    if (!pest) {
+
+        result.style.display = "none";
+
+        result.innerHTML = "";
+
+        return;
+    }
+
+
+    result.style.display = "block";
+
+
+    if (pest === "unknown") {
+
+        result.innerHTML = `
+
+            <div class="guidance-icon">
+                🔍
+            </div>
+
+            <h4>
+                Identify the Pest or Disease First
+            </h4>
+
+            <p>
+                Do not apply a pesticide simply because
+                the predicted yield is low.
+            </p>
+
+            <p>
+                Check leaves, stems, roots and fruits for
+                symptoms and identify the pest or disease
+                before selecting a pesticide.
+            </p>
+
+        `;
+
+        return;
+    }
+
+
+    if (pest === "insect") {
+
+        result.innerHTML = `
+
+            <div class="guidance-icon">
+                🐛
+            </div>
+
+            <h4>
+                Insect Management
+            </h4>
+
+            <p>
+                First identify the insect and determine
+                whether the infestation requires treatment.
+            </p>
+
+            <p>
+                Use an insecticide only when required and
+                follow the registered product label for
+                the selected crop and pest.
+            </p>
+
+            <div class="dose-placeholder">
+
+                <strong>
+                    Recommended dose:
+                </strong>
+
+                <span>
+                    Use the crop + pest + product-specific
+                    label recommendation.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    if (pest === "fungal") {
+
+        result.innerHTML = `
+
+            <div class="guidance-icon">
+                🍃
+            </div>
+
+            <h4>
+                Fungal Disease Management
+            </h4>
+
+            <p>
+                Identify the disease before selecting a
+                fungicide.
+            </p>
+
+            <p>
+                Improve field ventilation and avoid
+                unnecessary leaf wetness where appropriate.
+            </p>
+
+            <div class="dose-placeholder">
+
+                <strong>
+                    Recommended dose:
+                </strong>
+
+                <span>
+                    Use the crop + disease + product-specific
+                    label recommendation.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    if (pest === "weed") {
+
+        result.innerHTML = `
+
+            <div class="guidance-icon">
+                🌿
+            </div>
+
+            <h4>
+                Weed Management
+            </h4>
+
+            <p>
+                Use suitable cultural, mechanical or
+                chemical weed-control methods according
+                to the crop and weed species.
+            </p>
+
+            <p>
+                If a herbicide is used, follow the registered
+                product label and crop-specific recommendation.
+            </p>
+
+            <div class="dose-placeholder">
+
+                <strong>
+                    Recommended dose:
+                </strong>
+
+                <span>
+                    Depends on the identified weed, crop
+                    and registered product.
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* ============================================================
+   GAUGE FUNCTION
+============================================================ */
+
+function setGauge(
+    needleId,
+    value,
+    minValue,
+    maxValue
+) {
+
+    const needle =
+        document.getElementById(needleId);
+
+
+    if (!needle) {
+        return;
+    }
+
+
+    let percentage =
+        (value - minValue) /
+        (maxValue - minValue);
+
+
+    percentage =
+        Math.max(
+            0,
+            Math.min(
+                1,
+                percentage
+            )
+        );
+
+
+    const angle =
+        -90 +
+        (percentage * 180);
+
+
+    needle.style.transform =
+        `rotate(${angle}deg)`;
+
+}
+
+
+
+/* ============================================================
+   TEMPERATURE STATUS
+============================================================ */
+
+function getTemperatureStatus(
+    temperature
+) {
+
+    if (temperature < 15) {
+        return "Cold";
+    }
+
+    if (temperature < 25) {
+        return "Cool";
+    }
+
+    if (temperature < 32) {
+        return "Comfortable";
+    }
+
+    if (temperature < 38) {
+        return "Hot";
+    }
+
+    return "Very Hot";
+
+}
+
+
+
+/* ============================================================
+   HUMIDITY STATUS
+============================================================ */
+
+function getHumidityStatus(
+    humidity
+) {
+
+    if (humidity < 30) {
+        return "Dry";
+    }
+
+    if (humidity < 60) {
+        return "Comfortable";
+    }
+
+    if (humidity < 80) {
+        return "Humid";
+    }
+
+    return "Very Humid";
+
+}
+
+
+
+/* ============================================================
+   RAINFALL STATUS
+============================================================ */
+
+function getRainfallStatus(
+    rainfall
+) {
+
+    if (rainfall === 0) {
+        return "No precipitation";
+    }
+
+    if (rainfall < 2.5) {
+        return "Light precipitation";
+    }
+
+    if (rainfall < 7.5) {
+        return "Moderate precipitation";
+    }
+
+    return "Heavy precipitation";
+
+}
+
+
+
+/* ============================================================
+   LOAD CURRENT WEATHER
+============================================================ */
+
+async function loadWeather() {
+
+
+    const temperatureValue =
+        document.getElementById(
+            "temperatureValue"
+        );
+
+
+    const humidityValue =
+        document.getElementById(
+            "humidityValue"
+        );
+
+
+    const rainfallValue =
+        document.getElementById(
+            "rainfallValue"
+        );
+
+
+    const temperatureStatus =
+        document.getElementById(
+            "temperatureStatus"
+        );
+
+
+    const humidityStatus =
+        document.getElementById(
+            "humidityStatus"
+        );
+
+
+    const rainfallStatus =
+        document.getElementById(
+            "rainfallStatus"
+        );
+
+
+    const weatherUpdated =
+        document.getElementById(
+            "weatherUpdated"
+        );
+
+
+    try {
+
+
+        temperatureStatus.textContent =
+            "Loading...";
+
+        humidityStatus.textContent =
+            "Loading...";
+
+        rainfallStatus.textContent =
+            "Loading...";
+
+
+        const response =
+            await fetch("/weather");
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Weather request failed"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+
+        const temperature =
+            Number(
+                data.temperature
+            );
+
+
+        const humidity =
+            Number(
+                data.humidity
+            );
+
+
+        const rainfall =
+            Number(
+                data.rainfall
+            );
+
+
+        if (
+            !Number.isFinite(temperature) ||
+            !Number.isFinite(humidity) ||
+            !Number.isFinite(rainfall)
+        ) {
+
+            throw new Error(
+                "Invalid weather data"
+            );
+
+        }
+
+
+        temperatureValue.textContent =
+            temperature.toFixed(1);
+
+
+        humidityValue.textContent =
+            humidity.toFixed(0);
+
+
+        rainfallValue.textContent =
+            rainfall.toFixed(1);
+
+
+        setGauge(
+            "temperatureNeedle",
+            temperature,
+            -10,
+            50
+        );
+
+
+        setGauge(
+            "humidityNeedle",
+            humidity,
+            0,
+            100
+        );
+
+
+        setGauge(
+            "rainfallNeedle",
+            rainfall,
+            0,
+            20
+        );
+
+
+        temperatureStatus.textContent =
+            getTemperatureStatus(
+                temperature
+            );
+
+
+        humidityStatus.textContent =
+            getHumidityStatus(
+                humidity
+            );
+
+
+        rainfallStatus.textContent =
+            getRainfallStatus(
+                rainfall
+            );
+
+
+        const now =
+            new Date();
+
+
+        weatherUpdated.textContent =
+            now.toLocaleTimeString();
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Weather error:",
+            error
+        );
+
+
+        temperatureValue.textContent =
+            "--";
+
+
+        humidityValue.textContent =
+            "--";
+
+
+        rainfallValue.textContent =
+            "--";
+
+
+        temperatureStatus.textContent =
+            "Weather unavailable";
+
+
+        humidityStatus.textContent =
+            "Weather unavailable";
+
+
+        rainfallStatus.textContent =
+            "Weather unavailable";
+
+
+        weatherUpdated.textContent =
+            "Unable to load weather data";
+
+    }
+
+}
+
+
+
+/* ============================================================
+   LOAD AVERAGE ANNUAL RAINFALL
+============================================================ */
+
+async function loadAverageRainfall() {
+
+
+    const averageRainfallValue =
+        document.getElementById(
+            "averageRainfallValue"
+        );
+
+
+    const averageRainfallInfo =
+        document.getElementById(
+            "averageRainfallInfo"
+        );
+
+
+    try {
+
+
+        averageRainfallValue.textContent =
+            "--";
+
+
+        averageRainfallInfo.textContent =
+            "Calculating historical average...";
+
+
+        const response =
+            await fetch(
+                "/average-rainfall"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Average rainfall request failed"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+
+        const averageRainfall =
+            Number(
+                data.average_rainfall
+            );
+
+
+        if (
+            !Number.isFinite(
+                averageRainfall
+            )
+        ) {
+
+            throw new Error(
+                "Invalid average rainfall data"
+            );
+
+        }
+
+
+        averageRainfallValue.textContent =
+            averageRainfall.toFixed(2);
+
+
+        if (
+            data.start_year !== undefined &&
+            data.end_year !== undefined &&
+            data.years_used !== undefined
+        ) {
+
+            averageRainfallInfo.textContent =
+                `Calculated from ${data.years_used} years of historical rainfall data (${data.start_year}–${data.end_year}).`;
+
+        }
+
+        else {
+
+            averageRainfallInfo.textContent =
+                "Historical annual rainfall average.";
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Average rainfall error:",
+            error
+        );
+
+
+        averageRainfallValue.textContent =
+            "--";
+
+
+        averageRainfallInfo.textContent =
+            "Unable to calculate average annual rainfall.";
+
+    }
+
+}
+
+
+
+/* ============================================================
+   PAGE LOAD
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        loadWeather();
+
+
+        loadAverageRainfall();
+
+
+        setInterval(
+            loadWeather,
+            120000
+        );
+
+
+        setInterval(
+            loadAverageRainfall,
+            1800000
+        );
+
+    }
+);
+
+</script>
+
+
 </body>
+
 </html>
