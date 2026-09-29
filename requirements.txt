@@ -1,6 +1,7 @@
 Flask
-pandas
-numpy
-scikit-learn
 joblib
+pandas
+requests
 Werkzeug
+scikit-learn
+numpy
